@@ -1,3 +1,5 @@
+import datetime
+
 from scrapy.exceptions import DropItem
 
 
@@ -42,6 +44,17 @@ class PollPipeline(object):
     }
 
     def process_item(self, item, spider):
+        date = item["date"].strip("*")
+        # Most dates are YYYY-MM-DD, but some are DD/MM/YY.
+        if "-" in date:
+            date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
+        else:
+            try:
+                date = datetime.datetime.strptime(date, "%d/%m/%y").date()
+            except ValueError:
+                raise DropItem("ambiguous date in {}".format(item))
+        item["date"] = date
+
         if item["pollster"] == "GENERAL ELECTION":
             raise DropItem("dropping general election result")
         if not item["party"]:

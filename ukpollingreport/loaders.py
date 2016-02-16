@@ -1,5 +1,3 @@
-import datetime
-
 from scrapy.loader import ItemLoader
 from scrapy.loader.processors import MapCompose, TakeFirst
 
@@ -17,15 +15,11 @@ def make_number(v):
     return v
 
 
-def make_date(v):
-    return datetime.date(*(int(i) for i in v.strip("*").split("-")))
-
-
 class PollLoader(ItemLoader):
 
     default_output_processor = TakeFirst()
     pollster_in = MapCompose(strip_whitespace)
     client_in = MapCompose(strip_whitespace)
-    date_in = MapCompose(strip_whitespace, make_date)
+    date_in = MapCompose(strip_whitespace)
     party_in = MapCompose(strip_whitespace)
     share_in = MapCompose(make_number)
