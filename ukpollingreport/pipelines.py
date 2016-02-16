@@ -44,6 +44,11 @@ class PollPipeline(object):
     }
 
     def process_item(self, item, spider):
+        if item["pollster"] == "GENERAL ELECTION":
+            raise DropItem("dropping general election result")
+        if not item["date"]:
+            raise DropItem("missing date for {}".format(item))
+
         date = item["date"].strip("*")
         # Most dates are YYYY-MM-DD, but some are DD/MM/YY.
         if "-" in date:
@@ -55,10 +60,6 @@ class PollPipeline(object):
                 raise DropItem("ambiguous date in {}".format(item))
         item["date"] = date
 
-        if item["pollster"] == "GENERAL ELECTION":
-            raise DropItem("dropping general election result")
-        if not item["party"]:
-            raise DropItem("missing party in {}".format(item))
         item["pollster"] = self.POLLSTER_CORRECTIONS.get(item["pollster"],
                                                          item["pollster"])
         try:
